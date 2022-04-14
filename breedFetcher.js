@@ -1,28 +1,28 @@
 const request = require('request');
 
-const fetchBreedDescription = (catBreed) => {
+const fetchBreedDescription = (catBreed, callBack) => {
   const baseURL = "https://api.thecatapi.com/";
   const queryResource = "v1/breeds/search?q=";
 
-  if (!catBreed) return console.log("Error: Please enter a valid cat breed.");
+  if (!catBreed) return callBack(new Error("Please enter a valid cat breed."), '');
 
   request(baseURL + queryResource + catBreed, (error, response, body) => {
     if (error) {
-      return console.log(`Error: ${error}`);
+      return callBack(error, '');
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      return console.log('statusCode:', response && response.statusCode);
+      return callBack(new Error(response && response.statusCode), '');
     }
 
     const data = JSON.parse(body);
 
     if (data.length === 0) {
-      return console.log(`Cat breed ${catBreed} does not exist.`);
+      return callBack(new Error(`Cat breed ${catBreed} does not exist.`), '');
     }
 
-    console.log(data[0].description);
+    return callBack(null, data[0].description);
   });
 };
 
-fetchBreedDescription(process.argv[2]);
+module.exports = { fetchBreedDescription };
